@@ -1,5 +1,6 @@
 package main
 
+// Brainfuck compiler.
 type compiler struct {
 	code   string
 	length int

@@ -69,8 +69,14 @@ func (m *machine) execute() error {
 		switch instruction.it {
 		case plus:
 			m.mem[m.dp] += instruction.arg
+			if m.mem[m.dp] == 256 {
+				m.mem[m.dp] = 0
+			}
 		case minus:
 			m.mem[m.dp] -= instruction.arg
+			if m.mem[m.dp] == -1 {
+				m.mem[m.dp] = 255
+			}
 		case right:
 			m.dp += instruction.arg
 		case left:
