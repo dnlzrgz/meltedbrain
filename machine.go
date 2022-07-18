@@ -8,8 +8,8 @@ import (
 
 // Brainfuck machine.
 type machine struct {
-	code string // program to execute by the machine
-	ip   int    // instruction pointer
+	code []*instruction // program to execute by the machine
+	ip   int            // instruction pointer
 
 	mem [30000]int
 	dp  int // data pointer
@@ -20,9 +20,9 @@ type machine struct {
 	buf []byte // buffer
 }
 
-func newMachine(code string, in io.Reader, out io.Writer) *machine {
+func newMachine(instructions []*instruction, in io.Reader, out io.Writer) *machine {
 	return &machine{
-		code: code,
+		code: instructions,
 		in:   in,
 		out:  out,
 		buf:  make([]byte, 1),
@@ -66,50 +66,38 @@ func (m *machine) execute() error {
 	for m.ip < len(m.code) {
 		instruction := m.code[m.ip]
 
-		switch instruction {
-		case '+':
-			m.mem[m.dp]++
-		case '-':
-			m.mem[m.dp]--
-		case '>':
-			m.dp++
-		case '<':
-			m.dp--
-		case ',':
-			err := m.readChar()
-			if err != nil {
-				return errors.New(fmt.Sprintf("error while executing the instruction '%v': %v", ",", err))
+		switch instruction.it {
+		case plus:
+			m.mem[m.dp] += instruction.arg
+		case minus:
+			m.mem[m.dp] -= instruction.arg
+		case right:
+			m.dp += instruction.arg
+		case left:
+			m.dp -= instruction.arg
+		case writeChar:
+			for i := 0; i < instruction.arg; i++ {
+				err := m.writeChar()
+				if err != nil {
+					return errors.New(fmt.Sprintf("error while writing: %v", err))
+				}
 			}
-		case '.':
-			err := m.writeChar()
-			if err != nil {
-				return errors.New(fmt.Sprintf("error while executing the instruction '%v': %v", ".", err))
+		case readChar:
+			for i := 0; i < instruction.arg; i++ {
+				err := m.writeChar()
+				if err != nil {
+					return errors.New(fmt.Sprintf("error while reading: %v", err))
+				}
 			}
-		case '[':
+		case jumpIfZero:
 			if m.mem[m.dp] == 0 {
-				depth := 1
-				for depth != 0 {
-					m.ip++
-					switch m.code[m.ip] {
-					case '[':
-						depth++
-					case ']':
-						depth--
-					}
-				}
+				m.ip = instruction.arg
+				continue
 			}
-		case ']':
+		case jumpIfNotZero:
 			if m.mem[m.dp] != 0 {
-				depth := 1
-				for depth != 0 {
-					m.ip--
-					switch m.code[m.ip] {
-					case ']':
-						depth++
-					case '[':
-						depth--
-					}
-				}
+				m.ip = instruction.arg
+				continue
 			}
 		}
 
