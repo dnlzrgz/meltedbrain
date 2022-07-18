@@ -85,7 +85,35 @@ func (m *machine) execute() error {
 			if err != nil {
 				return errors.New(fmt.Sprintf("error while executing the instruction '%v': %v", ".", err))
 			}
+		case '[':
+			if m.mem[m.dp] == 0 {
+				depth := 1
+				for depth != 0 {
+					m.ip++
+					switch m.code[m.ip] {
+					case '[':
+						depth++
+					case ']':
+						depth--
+					}
+				}
+			}
+		case ']':
+			if m.mem[m.dp] != 0 {
+				depth := 1
+				for depth != 0 {
+					m.ip--
+					switch m.code[m.ip] {
+					case ']':
+						depth++
+					case '[':
+						depth--
+					}
+				}
+			}
 		}
+
+		m.ip++
 	}
 
 	return nil
