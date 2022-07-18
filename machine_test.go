@@ -12,8 +12,11 @@ func BenchmarkExecuteHelloWorld(b *testing.B) {
 		b.Fatal(err)
 	}
 
+	c := newCompiler(string(code))
+	instructions := c.compile()
+
 	out := &strings.Builder{}
-	m := newMachine(string(code), nil, out)
+	m := newMachine(instructions, nil, out)
 
 	for i := 0; i < b.N; i++ {
 		if err := m.execute(); err != nil {
@@ -27,8 +30,11 @@ func BenchmarkExecuteMandelbrot(b *testing.B) {
 		b.Fatal(err)
 	}
 
+	c := newCompiler(string(code))
+	instructions := c.compile()
+
 	out := &strings.Builder{}
-	m := newMachine(string(code), nil, out)
+	m := newMachine(instructions, nil, out)
 
 	for i := 0; i < b.N; i++ {
 		if err := m.execute(); err != nil {

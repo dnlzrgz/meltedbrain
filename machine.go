@@ -11,8 +11,8 @@ type machine struct {
 	code []*instruction // program to execute by the machine
 	ip   int            // instruction pointer
 
-	mem [30000]int
-	dp  int // data pointer
+	mem [30000]int // memory cells
+	dp  int        // data pointer
 
 	in  io.Reader // input stream
 	out io.Writer // output stream

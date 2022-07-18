@@ -13,7 +13,10 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	m := newMachine(string(code), os.Stdin, os.Stdout)
+	c := newCompiler(string(code))
+	instructions := c.compile()
+
+	m := newMachine(instructions, os.Stdin, os.Stdout)
 	if err := m.execute(); err != nil {
 		log.Fatalln(err)
 	}
